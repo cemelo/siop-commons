@@ -1,0 +1,62 @@
+apply plugin: 'java'
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+}
+
+allprojects {
+
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+
+    configurations {
+        markdownDoclet
+    }
+
+    dependencies {
+        markdownDoclet "ch.raffael.pegdown-doclet:pegdown-doclet:1.1.1"
+    }
+}
+
+javadoc {
+    title = 'SIOP Commons'
+
+    options {
+        docletpath = configurations.markdownDoclet.files.asType(List)
+        doclet = 'ch.raffael.doclets.pegdown.PegdownDoclet'
+
+        charSet = 'utf8'
+        encoding = 'utf8'
+        locale = 'pt_BR'
+
+        addStringOption("todo-title", "A FAZER")
+        addStringOption("parse-timeout", "10")
+        addBooleanOption("highlight-style")
+
+        links = [
+                "http://docs.oracle.com/javase/7/docs/api/"
+        ]
+    }
+    excludes = []
+}
+
+// Artifact publishing
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        siopCommons(MavenPublication) {
+            from components.java
+
+            pom.withXml {
+                asNode().appendNode('description',
+                        'Uma biblioteca de utilidades comuns aos projetos do SIOP.')
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
